@@ -21,6 +21,15 @@
             ],
             "filename": "boundaries_shapefiles_by_aggeco.zip",
             "metadata": "gagesII.md"
+        },
+        {
+            "data_type": "NWPS",
+            "url": "https://water.noaa.gov/resources/downloads/reports/nwps_all_gauges_report.csv",
+            "citations": [
+                "NOAA Office of Water Prediction, All Gauges Report csv download, https://water.noaa.gov/about/data-and-web-services-catalog. accessed on [ACCESS_DATE]"
+            ],
+            "filename": "nwps_all_gauges_report.csv",
+            "metadata": "nwps_all_gauges_report.md"
         }
     ]
 }

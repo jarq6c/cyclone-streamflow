@@ -12,6 +12,7 @@ class DataType(StrEnum):
     """Required data sources."""
     IBTRACS = "IBTrACS"
     GAGES_II = "GAGES_II"
+    NWPS = "NWPS"
 
 LOGGER: logging.Logger = logging.getLogger(__name__)
 """Module-level logger."""
@@ -118,8 +119,8 @@ def download_data_source(
         ).replace("ACCESS_DATE", date_string)
         with metadata.open("w", encoding="utf-8") as fo:
             fo.write(output)
-
-    LOGGER.info("%s exists, skipping download", filepath)
+    else:
+        LOGGER.info("%s exists, skipping download", filepath)
     return filepath
 
 def download_all_data(
