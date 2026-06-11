@@ -1,7 +1,8 @@
 """Main entry to data pipeline."""
 from pathlib import Path
 import logging
-from src.cyclone_streamflow.data_retrieval import download_all_data
+from src.cyclone_streamflow.data_retrieval import download_all_data, DataType
+from src.cyclone_streamflow.data_processing import process_ibtracs
 
 # Configure logging
 logging.basicConfig(
@@ -21,7 +22,12 @@ def main(
         Path to configuration JSON file.
 
     """
-    download_all_data(configuration_filepath)
+    # Download data
+    sources = download_all_data(configuration_filepath)
+
+    # Process data
+    gdf = process_ibtracs(sources[DataType.IBTRACS])
+    print(gdf)
 
 if __name__ == "__main__":
     main()

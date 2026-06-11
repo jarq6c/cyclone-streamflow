@@ -3,9 +3,15 @@ import logging
 from datetime import datetime, UTC
 from pathlib import Path
 from typing import TypeAlias, Annotated, Any
+from enum import StrEnum
 
 import requests
 from pydantic import BaseModel, HttpUrl, BeforeValidator
+
+class DataType(StrEnum):
+    """Required data sources."""
+    IBTRACS = "IBTrACS"
+    GAGES_II = "GAGES_II"
 
 LOGGER: logging.Logger = logging.getLogger(__name__)
 """Module-level logger."""
@@ -41,8 +47,8 @@ class DataSource(BaseModel):
     
     Attributes
     ----------
-    name : str
-        Machine-friendly name.
+    data_type : DataType
+        Type of data source.
     url : HttpUrl
         Source url.
     citations : list[str]
@@ -53,7 +59,7 @@ class DataSource(BaseModel):
         Desired local file name for Markdown metadata.
 
     """
-    name: str
+    data_type: DataType
     url: HttpUrl
     citations: list[str]
     filename: str
@@ -74,13 +80,22 @@ class Configuration(BaseModel):
     data_directory: CustomDirectoryPath
     data_sources: list[DataSource]
 
-def download_data_source(source: DataSource, directory: Path = Path(".")) -> None:
+def download_data_source(
+        source: DataSource,
+        directory: Path = Path(".")
+) -> Path:
     """Downloads a data associated with a DataSource object.
     
     Parameters
     ----------
     source : DataSource
         DataSource object
+    directory : pathlib.Path
+        Download directory.
+    
+    Returns
+    -------
+    pathlib.Path to downloaded file.
     """
     # Construct filepaths
     filepath = directory / source.filename
@@ -105,10 +120,11 @@ def download_data_source(source: DataSource, directory: Path = Path(".")) -> Non
             fo.write(output)
 
     LOGGER.info("%s exists, skipping download", filepath)
+    return filepath
 
 def download_all_data(
         configuration_filepath: Path = Path("configuration.json")
-) -> None:
+) -> dict[DataType, Path]:
     """
     Reads configuration file and downloads all required data.
     
@@ -123,5 +139,4 @@ def download_all_data(
         configuration = Configuration.model_validate_json(fi.read())
 
     # Download files
-    for ds in configuration.data_sources:
-        download_data_source(ds, configuration.data_directory)
+    return {ds.data_type: download_data_source(ds, configuration.data_directory) for ds in configuration.data_sources}

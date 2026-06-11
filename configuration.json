@@ -2,7 +2,7 @@
     "data_directory": "./data",
     "data_sources": [
         {
-            "name": "IBTrACS",
+            "data_type": "IBTrACS",
             "url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/netcdf/IBTrACS.since1980.v04r01.nc",
             "citations": [
                 "Knapp, K. R., M. C. Kruk, D. H. Levinson, H. J. Diamond, and C. J. Neumann, 2010: The International Best Track Archive for Climate Stewardship (IBTrACS): Unifying tropical cyclone best track data. Bulletin of the American Meteorological Society, 91, 363-376. doi:10.1175/2009BAMS2755.1",
@@ -13,7 +13,7 @@
             "metadata": "IBTrACS.md"
         },
         {
-            "name": "GAGES_II",
+            "data_type": "GAGES_II",
             "url": "https://www.sciencebase.gov/catalog/file/get/631405bbd34e36012efa304a?f=__disk__03%2Fe7%2F12%2F03e7123a54d9a7e87587595e09da7d093cbbf98d",
             "citations": [
                 "Falcone, J. A. (2011). GAGES-II: Geospatial attributes of gages for evaluating streamflow. USGS Report, 41.",
