@@ -30,7 +30,8 @@ def create_directory_path(
     
     Returns
     -------
-    pathlib.Path object.
+    pathlib.Path
+        Path to created directory.
     """
     path_object = Path(directory_path)
     path_object.mkdir(exist_ok=True, parents=True)
@@ -96,7 +97,8 @@ def download_data_source(
     
     Returns
     -------
-    pathlib.Path to downloaded file.
+    pathlib.Path
+        Path to downloaded file.
     """
     # Construct filepaths
     filepath = directory / source.filename
@@ -134,6 +136,10 @@ def download_all_data(
     configuration_filepath : pathlib.Path
         Path to configuration JSON file.
 
+    Returns
+    -------
+    dict[DataType, Path]
+        Dictionary mapping DataType objects to downloaded file paths.
     """
     # Load configuration
     with configuration_filepath.open("r", encoding="utf-8") as fi:

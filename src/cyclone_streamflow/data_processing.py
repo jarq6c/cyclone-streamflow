@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import Literal
 from enum import StrEnum
 import logging
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 
 import xarray as xr
 import geopandas as gpd
@@ -48,6 +50,11 @@ def process_ibtracs(
         CRS of returned GeoDataFrame. Defaults to North America Equidistant Conic.
     geometry_column : str, default 'geometry'
         Name of geopandas geometry column.
+    
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Georeferenced cyclone tracks within maximum_distance of land.
     """
     LOGGER.info("Processing %s", source)
 
@@ -99,3 +106,39 @@ def process_ibtracs(
 
     # Project to distance preserving CRS
     return gpd.GeoDataFrame(df).to_crs(output_crs)
+
+def process_gages_ii(
+        source: Path,
+        output_crs: str = GLOBAL_CRS,
+        boundary_source: str = "boundaries-shapefiles-by-aggeco/bas_ref_all.shp"
+) -> gpd.GeoDataFrame:
+    """Read GAGES-II boundaries zipfile, extract relevant data, and return a GeoDataFrame.
+    
+    Parameters
+    ----------
+    source : pathlib.Path
+        Path to source zipfile.
+    output_crs : str, default 'ESRI:102010'
+        CRS of returned GeoDataFrame. Defaults to North America Equidistant Conic.
+    boundary_source: str, default 'boundaries-shapefiles-by-aggeco/bas_ref_all.shp'
+        Path to basin boundaries inside source zipfile.
+    
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Georeferenced GAGES-II basin geometry.
+    """
+    # Extract and load shapefile
+    with TemporaryDirectory() as td:
+        with ZipFile(source) as zf:
+            # Extract
+            LOGGER.info("Extracting %s", source)
+            zf.extractall(path=td)
+
+            # Load
+            LOGGER.info("Reading %s", boundary_source)
+            return gpd.read_file(
+                Path(td) / boundary_source,
+                engine="pyogrio",
+                use_arrow=True
+            ).to_crs(output_crs)

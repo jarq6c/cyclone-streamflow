@@ -2,7 +2,7 @@
 from pathlib import Path
 import logging
 from src.cyclone_streamflow.data_retrieval import download_all_data, DataType
-from src.cyclone_streamflow.data_processing import process_ibtracs
+from src.cyclone_streamflow.data_processing import process_gages_ii
 
 # Configure logging
 logging.basicConfig(
@@ -26,7 +26,7 @@ def main(
     sources = download_all_data(configuration_filepath)
 
     # Process data
-    gdf = process_ibtracs(sources[DataType.IBTRACS])
+    gdf = process_gages_ii(sources[DataType.GAGES_II])
     print(gdf)
 
 if __name__ == "__main__":
