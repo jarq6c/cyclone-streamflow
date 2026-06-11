@@ -1,0 +1,16 @@
+{
+    "data_directory": "./data",
+    "data_sources": [
+        {
+            "name": "IBTrACS",
+            "url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/netcdf/IBTrACS.since1980.v04r01.nc",
+            "citations": [
+                "Knapp, K. R., M. C. Kruk, D. H. Levinson, H. J. Diamond, and C. J. Neumann, 2010: The International Best Track Archive for Climate Stewardship (IBTrACS): Unifying tropical cyclone best track data. Bulletin of the American Meteorological Society, 91, 363-376. doi:10.1175/2009BAMS2755.1",
+                "Gahtan, J., K. R. Knapp, C. J. Schreck, H. J. Diamond, J. P. Kossin, M. C. Kruk, 2024: International Best Track Archive for Climate Stewardship (IBTrACS) Project, Version 4r01. [indicate subset used]. NOAA National Centers for Environmental Information. doi:10.25921/82ty-9e16 [ACCESS_DATE]",
+                "NOAA's International Best Track Archive for Climate Stewardship (IBTrACS) data, accessed on [ACCESS_DATE]"
+            ],
+            "filename": "IBTrACS.since1980.v04r01.nc",
+            "metadata": "IBTrACS.md"
+        }
+    ]
+}
