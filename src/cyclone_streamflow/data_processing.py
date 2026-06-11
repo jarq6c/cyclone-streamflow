@@ -49,6 +49,8 @@ def process_ibtracs(
     geometry_column : str, default 'geometry'
         Name of geopandas geometry column.
     """
+    LOGGER.info("Processing %s", source)
+
     # Open dataset
     with xr.open_dataset(source) as ds:
         # Extract distance to land, nature, and categories; convert to DataFrame
