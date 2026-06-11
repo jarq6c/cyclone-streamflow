@@ -11,6 +11,16 @@
             ],
             "filename": "IBTrACS.since1980.v04r01.nc",
             "metadata": "IBTrACS.md"
+        },
+        {
+            "name": "GAGES_II",
+            "url": "https://www.sciencebase.gov/catalog/file/get/631405bbd34e36012efa304a?f=__disk__03%2Fe7%2F12%2F03e7123a54d9a7e87587595e09da7d093cbbf98d",
+            "citations": [
+                "Falcone, J. A. (2011). GAGES-II: Geospatial attributes of gages for evaluating streamflow. USGS Report, 41.",
+                "Falcone, James. (2011). GAGES-II: Geospatial Attributes of Gages for Evaluating Streamflow. vector digital data. Reston, Virginia. U.S. Geological Survey. https://doi.org/10.5066/P96CPHOT"
+            ],
+            "filename": "boundaries_shapefiles_by_aggeco.zip",
+            "metadata": "gagesII.md"
         }
     ]
 }
