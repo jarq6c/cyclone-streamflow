@@ -2,8 +2,10 @@
 from pathlib import Path
 from typing import Optional
 import logging
+from itertools import count
 
 import geopandas as gpd
+import pandas as pd
 
 from .configuration import DataType, Configuration
 from .data_retrieval import download_data_source
@@ -106,3 +108,54 @@ def process_all_data(
 
     # Process files
     return {t: run_data_processor(sources[t], p, directory / f"{t}.parquet") for t, p in data_processors.items()}
+
+def merge_storm_basins(
+        basins: gpd.GeoDataFrame,
+        storms: gpd.GeoDataFrame,
+        maximum_distance: float = 400.0,
+        location_column: str = "GAGE_ID",
+        geometry_column: str = "geometry"
+) -> gpd.GeoDataFrame:
+    """Merge storm tracks with basins within buffer.
+
+    Parameters
+    ----------
+    basins : geopandas.GeoDataFrame
+        Georeferenced basin geometry.
+    storms : geopandas.GeoDataFrame
+        Georeferenced cyclone tracks.
+    maximum_distance : float, default 400.0
+        Maximum distance to individual basin in km of cyclone centers to include
+        in resulting GeoDataFrame.
+    location_column : str, default 'GAGE_ID'
+        Column in basins to use as location identifier.
+    geometry_column : str, default 'geometry'
+        Column in basins that indicates basin geometry.
+    
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Combined GeoDataFrame of storms, basins, and associated metadata.
+    """
+    # Match basins to storm tracks
+    number_of_gages = len(basins[location_column])
+    counter = count(1)
+    dfs = []
+    for _, gage_id, boundary in basins[[location_column, geometry_column]].itertuples():
+        # Report
+        logging.info("%s - %d / %d", gage_id, next(counter), number_of_gages)
+
+        # Clip storm tracks to basin boundary
+        subset = storms.clip(boundary.buffer(maximum_distance))
+
+        # Check for storms
+        if subset.empty:
+            logging.info("No storms found")
+            continue
+
+        # Save storms
+        subset[location_column] = gage_id
+        dfs.append(subset)
+
+    # Merge
+    return pd.concat(dfs, ignore_index=True)
