@@ -12,7 +12,8 @@ import pandas as pd
 from .configuration import (
     GLOBAL_CRS,
     IBTrACSColumn,
-    NWPS_COLUMN_DATATYPES
+    NWPS_COLUMN_DATATYPES,
+    NWPSColumn
 )
 
 LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -172,16 +173,10 @@ def process_nwps(
 
     # Add geometry
     df[geometry_column] = gpd.points_from_xy(
-        x=df["longitude"],
-        y=df["latitude"],
+        x=df[NWPSColumn.LONGITUDE],
+        y=df[NWPSColumn.LATITUDE],
         crs=source_crs
     )
-
-    # Fix erroneous reach id
-    df.loc[df["reach id"] == "LKLO1 ", "reach id"] = "15396810"
-
-    # Convert reach id to integer
-    df["reach id"] = pd.to_numeric(df["reach id"])
 
     # Convert to GeoDataFrame
     return gpd.GeoDataFrame(df).to_crs(output_crs)

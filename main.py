@@ -26,9 +26,5 @@ def main(
     sources = download_all_data(configuration)
     data = process_all_data(sources)
 
-    for t, gdf in data.items():
-        print(t)
-        print(gdf.head(1))
-
 if __name__ == "__main__":
     main()

@@ -32,6 +32,11 @@ class IBTrACSColumn(StrEnum):
 GLOBAL_CRS: Literal["ESRI:102010"] = "ESRI:102010"
 """Distance preserving CRS string. North America Equidistant Conic."""
 
+class NWPSColumn(StrEnum):
+    """NWPS CSV fields."""
+    LATITUDE = "latitude"
+    LONGITUDE = "longitude"
+
 NWPS_COLUMN_DATATYPES: dict[Hashable, DtypeArg] = {
     "location name": "string",
     "proximity": "string",
@@ -39,8 +44,8 @@ NWPS_COLUMN_DATATYPES: dict[Hashable, DtypeArg] = {
     "nws shef id": "string",
     "location type": "string",
     "usgs id": "string",
-    "latitude": "float32",
-    "longitude": "float32",
+    NWPSColumn.LATITUDE: "float32",
+    NWPSColumn.LONGITUDE: "float32",
     "wfo": "string",
     "rfc": "string",
     "state": "string",
