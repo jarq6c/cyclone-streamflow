@@ -1,82 +1,27 @@
 """Methods for transforming and cleaning source data."""
 from pathlib import Path
-from typing import Literal
-from enum import StrEnum
+from typing import Protocol, Any
 import logging
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
-from collections.abc import Hashable
 
 import xarray as xr
 import geopandas as gpd
 import pandas as pd
-from pandas._typing import DtypeArg
 
-class IBTrACSColumn(StrEnum):
-    """IBTrACS NetCDF fields."""
-    DIST2LAND = "dist2land"
-    STORM_NAME = "name"
-    STORM_TYPE = "nature"
-    STORM_CATEGORY = "usa_sshs"
-    LONGITUDE = "lon"
-    LATITUDE = "lat"
-    STORM_ID = "storm"
-    LIFETIME_MAXIMUM = "lifetime_max_intensity"
-    TIME = "time"
-
-GLOBAL_CRS: Literal["ESRI:102010"] = "ESRI:102010"
-"""Distance preserving CRS string. North America Equidistant Conic."""
+from .configuration import (
+    GLOBAL_CRS,
+    IBTrACSColumn,
+    NWPS_COLUMN_DATATYPES
+)
 
 LOGGER: logging.Logger = logging.getLogger(__name__)
 """Module-level logger."""
 
-NWPS_COLUMN_DATATYPES: dict[Hashable, DtypeArg] = {
-    "location name": "string",
-    "proximity": "string",
-    "river/water-body name": "string",
-    "nws shef id": "string",
-    "location type": "string",
-    "usgs id": "string",
-    "latitude": "float32",
-    "longitude": "float32",
-    "wfo": "string",
-    "rfc": "string",
-    "state": "string",
-    "county": "string",
-    "wrr": "string",
-    "timezone": "string",
-    "inundation": "bool",
-    "elevation": "float32",
-    "action stage": "float32",
-    "flood stage": "float32",
-    "moderate flood stage": "float32",
-    "major flood stage": "float32",
-    "flood stage unit": "string",
-    "coeid": "string",
-    "hydrograph page": "string",
-    "pedts": "string",
-    "in service": "bool",
-    "hemisphere": "string",
-    "low water threshold value / units": "string",
-    "forecast status": "string",
-    "display low water impacts": "bool",
-    "low flow display": "bool",
-    "give data attribution": "bool",
-    "attribution wording": "string",
-    "fema wms": "string",
-    "probabilistic site": "bool",
-    "weekly chance probabilistic enabled": "bool",
-    "short-term probabilistic enabled": "bool",
-    "chance of exceeding probabilistic enabled": "bool",
-    "nrldb vertical datum name": "string",
-    "nrldb vertical datum": "string",
-    "navd88 vertical datum": "string",
-    "ngvd29 vertical datum": "string",
-    "msl vertical datum": "string",
-    "other vertical datum": "string",
-    "reach id": "string"
-}
-"""Mapping from NWPS All Gauges Report column names to pandas data types."""
+class DataProcessor(Protocol):
+    """Protocol class that defines the interface for data processing methods."""
+    def __call__(self, source: Path, *args: Any, **kwds: Any) -> gpd.GeoDataFrame:
+        ...
 
 def process_ibtracs(
         source: Path,
@@ -179,6 +124,8 @@ def process_gages_ii(
     geopandas.GeoDataFrame
         Georeferenced GAGES-II basin geometry.
     """
+    LOGGER.info("Processing %s", source)
+
     # Extract and load shapefile
     with TemporaryDirectory() as td:
         with ZipFile(source) as zf:
@@ -218,6 +165,8 @@ def process_nwps(
     geopandas.GeoDataFrame
         Georeferenced gauge metadata.
     """
+    LOGGER.info("Processing %s", source)
+
     # Read CSV
     df = pd.read_csv(source, dtype=NWPS_COLUMN_DATATYPES)
 

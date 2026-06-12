@@ -1,8 +1,8 @@
 """Main entry to data pipeline."""
 from pathlib import Path
 import logging
-from src.cyclone_streamflow.data_retrieval import download_all_data, DataType
-from src.cyclone_streamflow.data_processing import process_nwps
+from src.cyclone_streamflow.configuration import load_configuration
+from src.cyclone_streamflow.pipelines import download_all_data, process_all_data
 
 # Configure logging
 logging.basicConfig(
@@ -22,12 +22,13 @@ def main(
         Path to configuration JSON file.
 
     """
-    # Download data
-    sources = download_all_data(configuration_filepath)
+    configuration = load_configuration(configuration_filepath)
+    sources = download_all_data(configuration)
+    data = process_all_data(sources)
 
-    # Process data
-    gdf = process_nwps(sources[DataType.NWPS])
-    print(gdf.info())
+    for t, gdf in data.items():
+        print(t)
+        print(gdf.head(1))
 
 if __name__ == "__main__":
     main()
