@@ -1,9 +1,6 @@
 """Main entry to data pipeline."""
 from pathlib import Path
 import logging
-from itertools import count
-
-import pandas as pd
 
 from src.cyclone_streamflow.configuration import load_configuration, DataType
 from src.cyclone_streamflow.pipelines import download_all_data, process_all_data, merge_storm_basins
