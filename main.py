@@ -2,7 +2,7 @@
 from pathlib import Path
 import logging
 from src.cyclone_streamflow.data_retrieval import download_all_data, DataType
-from src.cyclone_streamflow.data_processing import process_gages_ii
+from src.cyclone_streamflow.data_processing import process_nwps
 
 # Configure logging
 logging.basicConfig(
@@ -26,8 +26,8 @@ def main(
     sources = download_all_data(configuration_filepath)
 
     # Process data
-    gdf = process_gages_ii(sources[DataType.GAGES_II])
-    print(gdf)
+    gdf = process_nwps(sources[DataType.NWPS])
+    print(gdf.info())
 
 if __name__ == "__main__":
     main()
