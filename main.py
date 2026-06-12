@@ -1,7 +1,7 @@
 """Main entry to data pipeline."""
 from pathlib import Path
 import logging
-from src.cyclone_streamflow.configuration import load_configuration
+from src.cyclone_streamflow.configuration import load_configuration, DataType
 from src.cyclone_streamflow.pipelines import download_all_data, process_all_data
 
 # Configure logging
@@ -24,7 +24,9 @@ def main(
     """
     configuration = load_configuration(configuration_filepath)
     sources = download_all_data(configuration)
-    data = process_all_data(sources)
+    data = process_all_data(sources, directory=configuration.data_directory)
+    for k, v in data.items():
+        print(k, v.head(1))
 
 if __name__ == "__main__":
     main()
