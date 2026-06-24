@@ -31,5 +31,11 @@
             "filename": "nwps_all_gauges_report.csv",
             "metadata": "nwps_all_gauges_report.md"
         }
-    ]
+    ],
+    "processed_data": {
+        "basin_storms": {
+            "path": "basin_storms.parquet",
+            "description": "Storm tracks mapped to streamflow basins."
+        }
+    }
 }

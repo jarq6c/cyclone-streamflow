@@ -114,7 +114,8 @@ def merge_storm_basins(
         storms: gpd.GeoDataFrame,
         maximum_distance: float = 400.0,
         location_column: str = "GAGE_ID",
-        geometry_column: str = "geometry"
+        geometry_column: str = "geometry",
+        filepath: Optional[Path] = None
 ) -> gpd.GeoDataFrame:
     """Merge storm tracks with basins within buffer.
 
@@ -131,26 +132,33 @@ def merge_storm_basins(
         Column in basins to use as location identifier.
     geometry_column : str, default 'geometry'
         Column in basins that indicates basin geometry.
+    filepath: pathlib.Path, optional
+        Optional filepath to save results for quick retrieval later.
     
     Returns
     -------
     geopandas.GeoDataFrame
         Combined GeoDataFrame of storms, basins, and associated metadata.
     """
+    # Check for existing file
+    if filepath and filepath.exists():
+        LOGGER.info("Found %s", filepath)
+        return gpd.read_parquet(filepath)
+
     # Match basins to storm tracks
     number_of_gages = len(basins[location_column])
     counter = count(1)
     dfs = []
     for _, gage_id, boundary in basins[[location_column, geometry_column]].itertuples():
         # Report
-        logging.info("%s - %d / %d", gage_id, next(counter), number_of_gages)
+        LOGGER.info("%s - %d / %d", gage_id, next(counter), number_of_gages)
 
         # Clip storm tracks to basin boundary
         subset = storms.clip(boundary.buffer(maximum_distance))
 
         # Check for storms
         if subset.empty:
-            logging.info("No storms found")
+            LOGGER.info("No storms found")
             continue
 
         # Save storms
@@ -158,4 +166,9 @@ def merge_storm_basins(
         dfs.append(subset)
 
     # Merge
-    return pd.concat(dfs, ignore_index=True)
+    result = pd.concat(dfs, ignore_index=True)
+
+    # Save
+    if filepath:
+        result.to_parquet(filepath)
+    return result

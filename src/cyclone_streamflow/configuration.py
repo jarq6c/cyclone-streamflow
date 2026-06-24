@@ -139,20 +139,48 @@ class DataSource(BaseModel):
     filename: str
     metadata: str
 
+class ProcessedData(BaseModel):
+    """
+    Pydantic model for different stages of processed data.
+
+    Attributes
+    ----------
+    path : str
+        Filename to save processed data to under data_directory.
+    description : str
+        Description of data.
+    """
+    path: str
+    description: str
+
+class ProcessedDataStore(BaseModel):
+    """
+    Tracks different types of processed data.
+
+    Attributes
+    ----------
+    basin_storms : ProcessedData
+        Pydantic model describing joined table of cyclones and streamflow basins.
+    """
+    basin_storms: ProcessedData
+
 class Configuration(BaseModel):
     """
     Project configuration Pydantic model.
     
     Attributes
     ----------
-    data_directory: pathlib.Path
+    data_directory : pathlib.Path
         Path to data/download directory.
     data_sources : list[DataSource]
         List of DataSource objects.
+    processed_data : ProcessedDataStore
+        Pydantic model that track intermediate processed data.
 
     """
     data_directory: CustomDirectoryPath
     data_sources: list[DataSource]
+    processed_data: ProcessedDataStore
 
 def load_configuration(
         configuration_filepath: Path = Path("configuration.json")

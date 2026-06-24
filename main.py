@@ -30,7 +30,8 @@ def main(
     # Match basins to storm tracks
     result = merge_storm_basins(
         basins=data[DataType.GAGES_II],
-        storms=data[DataType.IBTRACS]
+        storms=data[DataType.IBTRACS],
+        filepath=configuration.data_directory / configuration.processed_data.basin_storms.path
     )
     print(result)
 
