@@ -13,7 +13,9 @@ from .configuration import (
     GLOBAL_CRS,
     IBTrACSColumn,
     NWPS_COLUMN_DATATYPES,
-    NWPSColumn
+    NWPSColumn,
+    GAGES_III_COLUMN_TYPES,
+    GAGESIIIColumn
 )
 
 LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -155,7 +157,7 @@ def process_nwps(
     source : pathlib.Path
         Path to source CSV.
     source_crs : str, default 'EPSG:4326'
-        CRS of CSV cyclone tracks.
+        CRS of gauge locations.
     output_crs : str, default 'ESRI:102010'
         CRS of returned GeoDataFrame. Defaults to North America Equidistant Conic.
     geometry_column : str, default 'geometry'
@@ -175,6 +177,47 @@ def process_nwps(
     df[geometry_column] = gpd.points_from_xy(
         x=df[NWPSColumn.LONGITUDE],
         y=df[NWPSColumn.LATITUDE],
+        crs=source_crs
+    )
+
+    # Convert to GeoDataFrame
+    return gpd.GeoDataFrame(df).to_crs(output_crs)
+
+def process_gages_iii(
+        source: Path,
+        source_crs: str = "EPSG:4326",
+        output_crs: str = GLOBAL_CRS,
+        geometry_column: str = "geometry"
+) -> gpd.GeoDataFrame:
+    """Read GAGES-3 CSV data and return a GeoDataFrame.
+    
+    Parameters
+    ----------
+    source : pathlib.Path
+        Path to source CSV.
+    source_crs : str, default 'EPSG:4326'
+        CRS of CSV cyclone tracks.
+    output_crs : str, default 'ESRI:102010'
+        CRS of returned GeoDataFrame. Defaults to North America Equidistant Conic.
+    geometry_column : str, default 'geometry'
+        Name of geopandas geometry column.
+    
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Georeferenced gauge metadata.
+    """
+    LOGGER.info("Processing %s", source)
+
+    # Read CSV
+    df = pd.read_csv(source, dtype=GAGES_III_COLUMN_TYPES, parse_dates=[
+        GAGESIIIColumn.BEGIN_DATE, GAGESIIIColumn.END_DATE
+    ])
+
+    # Add geometry
+    df[geometry_column] = gpd.points_from_xy(
+        x=df[GAGESIIIColumn.LONGITUDE],
+        y=df[GAGESIIIColumn.LATITUDE],
         crs=source_crs
     )
 

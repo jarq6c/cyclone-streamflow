@@ -86,6 +86,50 @@ NWPS_COLUMN_DATATYPES: dict[Hashable, DtypeArg] = {
 }
 """Mapping from NWPS All Gauges Report column names to pandas data types."""
 
+GAGES_III_COLUMN_TYPES: dict[Hashable, DtypeArg] = {
+    "ID": "string",
+    "NWIS_Area": "float32",
+    "NHD_Area": "float32",
+    "Adj_NWIS_Area": "float32",
+    "End_Year": "Int32",
+    "Station_Name": "string",
+    "Lat_Dec": "float32",
+    "Long_Dec": "float32",
+    "Source": "string",
+    "COMID_Man_QA": "Int64",
+    "Gages2_Status": "string",
+    "Gages3_Status": "string",
+    "Gages3_Screen_Comments": "string",
+    "Other_Info_Sources": "string",
+    "HDI.Pct.Ag": "float32",
+    "HDI.Art.Path": "float32",
+    "HDI.Canals": "float32",
+    "HDI.NPDES": "float32",
+    "HDI.FW.With": "float32",
+    "HDI.MDam.Dens": "float32",
+    "HDI.Delta.Stg": "float32",
+    "HDI.Pct.Urban": "float32",
+    "NA_Eco3": "string",
+    "Size.Class": "string",
+    "Ag.Rank": "string",
+    "Art.Path.Rank": "string",
+    "Canals.Rank": "string",
+    "NPDES.Rank": "string",
+    "FW.With.Rank": "string",
+    "MDam.Den.Rank": "string",
+    "Delta.Stg.Rank": "string",
+    "Urban.Rank": "string",
+    "Gages2_Screen_Comments": "string"
+}
+"""Mapping from GAGES-3 column names to pandas data types."""
+
+class GAGESIIIColumn(StrEnum):
+    """GAGES-3 CSV fields."""
+    LATITUDE = "Lat_Dec"
+    LONGITUDE = "Long_Dec"
+    BEGIN_DATE = "Begin_Date"
+    END_DATE = "End_Date"
+
 def create_directory_path(
         directory_path: str | Path
 ) -> Path:

@@ -13,7 +13,8 @@ from .data_processing import (
     DataProcessor,
     process_gages_ii,
     process_ibtracs,
-    process_nwps
+    process_nwps,
+    process_gages_iii
 )
 
 LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -22,7 +23,8 @@ LOGGER: logging.Logger = logging.getLogger(__name__)
 DATA_PROCESSING_FUNCTIONS: dict[DataType, DataProcessor] = {
     DataType.IBTRACS: process_ibtracs,
     DataType.GAGES_II: process_gages_ii,
-    DataType.NWPS: process_nwps
+    DataType.NWPS: process_nwps,
+    DataType.GAGES_III: process_gages_iii
 }
 """Mapping from DataType enums to DataProcessor callables."""
 
