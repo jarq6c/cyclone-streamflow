@@ -16,6 +16,7 @@ class DataType(StrEnum):
     IBTRACS = "IBTrACS"
     GAGES_II = "GAGES_II"
     NWPS = "NWPS"
+    GAGES_III = "GAGES_III"
 
 class IBTrACSColumn(StrEnum):
     """IBTrACS NetCDF fields."""

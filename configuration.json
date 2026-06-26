@@ -30,6 +30,15 @@
             ],
             "filename": "nwps_all_gauges_report.csv",
             "metadata": "nwps_all_gauges_report.md"
+        },
+        {
+            "data_type": "GAGES_III",
+            "url": "https://www.sciencebase.gov/catalog/file/get/68c831e7d4be025032016570?f=__disk__b8%2Fde%2F91%2Fb8de918b45eaf594c146ef503e756ff54c227b8a",
+            "citations": [
+                "Carlisle, D.M., 2026, GAGES 3: Environmental Setting of USGS Stream Gage Locations in the Conterminous United States: U.S. Geological Survey data release, https://doi.org/10.5066/P138XCM3."
+            ],
+            "filename": "Gages3_Data_2026_01.csv",
+            "metadata": "gagesIII.md"
         }
     ],
     "processed_data": {
