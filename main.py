@@ -33,6 +33,13 @@ def main(
         storms=data[DataType.IBTRACS],
         filepath=configuration.data_directory / configuration.processed_data.basin_storms.path
     )
+    print(result.head(1))
+    result = merge_storm_basins(
+        basins=data[DataType.NWM_BASINS],
+        storms=data[DataType.IBTRACS],
+        filepath=configuration.data_directory / configuration.processed_data.nwm_basin_storms.path,
+        location_column="provider_id"
+    )
     print(result)
 
 if __name__ == "__main__":

@@ -196,7 +196,7 @@ def process_gages_iii(
     source : pathlib.Path
         Path to source CSV.
     source_crs : str, default 'EPSG:4326'
-        CRS of CSV cyclone tracks.
+        CRS of CSV gage locations.
     output_crs : str, default 'ESRI:102010'
         CRS of returned GeoDataFrame. Defaults to North America Equidistant Conic.
     geometry_column : str, default 'geometry'
@@ -223,3 +223,43 @@ def process_gages_iii(
 
     # Convert to GeoDataFrame
     return gpd.GeoDataFrame(df).to_crs(output_crs)
+
+def process_nwm_basins(
+        source: Path,
+        source_crs: str = "EPSG:4269",
+        output_crs: str = GLOBAL_CRS,
+        geometry_column: str = "geometry"
+) -> gpd.GeoDataFrame:
+    """Read NWM basin boundary GeoPackage and return a GeoDataFrame.
+    
+    Parameters
+    ----------
+    source : pathlib.Path
+        Path to source GeoPackage.
+    source_crs : str, default 'EPSG:4269'
+        CRS of GeoPackage.
+    output_crs : str, default 'ESRI:102010'
+        CRS of returned GeoDataFrame. Defaults to North America Equidistant Conic.
+    geometry_column : str, default 'geometry'
+        Name of geopandas geometry column.
+    
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Georeferenced assimilation gauge basin boundaries.
+    """
+    LOGGER.info("Processing %s", source)
+
+    # Read
+    gdf = gpd.read_file(source)
+
+    # Check for geometry
+    if "geometry" not in gdf.columns:
+        raise ValueError(f"No geometry found in {source}")
+
+    # Check CRS
+    if gdf.crs != source_crs:
+        raise ValueError(f"CRS {gdf.crs} does not match source CRS {source_crs}")
+
+    # Convert to GeoDataFrame
+    return gdf.to_crs(output_crs)

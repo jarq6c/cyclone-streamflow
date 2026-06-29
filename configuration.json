@@ -39,12 +39,25 @@
             ],
             "filename": "Gages3_Data_2026_01.csv",
             "metadata": "gagesIII.md"
+        },
+        {
+            "data_type": "NWM_BASINS",
+            "url": "https://hydroshare.org/resource/535aab9267ee4aed8502fd63dcd3fac2/data/contents/nwm_usgs_assimilation_gages_basin_boundaries_epsg_4269.gpkg",
+            "citations": [
+                "Regina, J. A. (2026). National Water Model Assimilation Gage Basin Boundaries, HydroShare, https://doi.org/10.4211/hs.535aab9267ee4aed8502fd63dcd3fac2."
+            ],
+            "filename": "nwm_usgs_assimilation_gages_basin_boundaries_epsg_4269.gpkg",
+            "metadata": "nwm_basins.md"
         }
     ],
     "processed_data": {
         "basin_storms": {
             "path": "basin_storms.parquet",
             "description": "Storm tracks mapped to streamflow basins."
+        },
+        "nwm_basin_storms": {
+            "path": "nwm_basin_storms.parquet",
+            "description": "Storm tracks mapped to NWM assimilation gauge basins."
         }
     }
 }

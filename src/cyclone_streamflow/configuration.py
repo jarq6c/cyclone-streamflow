@@ -17,6 +17,7 @@ class DataType(StrEnum):
     GAGES_II = "GAGES_II"
     NWPS = "NWPS"
     GAGES_III = "GAGES_III"
+    NWM_BASINS = "NWM_BASINS"
 
 class IBTrACSColumn(StrEnum):
     """IBTrACS NetCDF fields."""
@@ -206,8 +207,11 @@ class ProcessedDataStore(BaseModel):
     ----------
     basin_storms : ProcessedData
         Pydantic model describing joined table of cyclones and streamflow basins.
+    nwm_basin_storms : ProcessedData
+        Pydantic model describing joined table of cyclones and NWM assimilation gauge basins.
     """
     basin_storms: ProcessedData
+    nwm_basin_storms: ProcessedData
 
 class Configuration(BaseModel):
     """
