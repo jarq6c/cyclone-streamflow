@@ -2,6 +2,8 @@
 from pathlib import Path
 import logging
 
+import pandas as pd
+
 from src.cyclone_streamflow.configuration import load_configuration, DataType
 from src.cyclone_streamflow.pipelines import download_all_data, process_all_data, merge_storm_basins
 
@@ -28,19 +30,21 @@ def main(
     data = process_all_data(sources, directory=configuration.data_directory)
 
     # Match basins to storm tracks
-    result = merge_storm_basins(
-        basins=data[DataType.GAGES_II],
-        storms=data[DataType.IBTRACS],
-        filepath=configuration.data_directory / configuration.processed_data.basin_storms.path
-    )
-    print(result.head(1))
-    result = merge_storm_basins(
+    basin_tracks = merge_storm_basins(
         basins=data[DataType.NWM_BASINS],
         storms=data[DataType.IBTRACS],
         filepath=configuration.data_directory / configuration.processed_data.nwm_basin_storms.path,
         location_column="provider_id"
     )
-    print(result)
+
+    # Accumulate storm-basin periods
+    # TODO Fix erroneous distance. Projection is in meters. Change 400 to 400_000.
+    basin_storms = basin_tracks.groupby(["provider_id", "storm"]).agg(
+        Name=pd.NamedAgg(column="name", aggfunc="first"),
+        Start=pd.NamedAgg(column="time", aggfunc="min"),
+        End=pd.NamedAgg(column="time", aggfunc="max")
+    )
+    print(basin_storms)
 
 if __name__ == "__main__":
     main()
