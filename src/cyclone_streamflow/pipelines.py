@@ -116,7 +116,7 @@ def process_all_data(
 def merge_storm_basins(
         basins: gpd.GeoDataFrame,
         storms: gpd.GeoDataFrame,
-        maximum_distance: float = 400.0,
+        maximum_distance: float = 400_000.0,
         location_column: str = "GAGE_ID",
         geometry_column: str = "geometry",
         filepath: Optional[Path] = None
@@ -129,8 +129,8 @@ def merge_storm_basins(
         Georeferenced basin geometry.
     storms : geopandas.GeoDataFrame
         Georeferenced cyclone tracks.
-    maximum_distance : float, default 400.0
-        Maximum distance to individual basin in km of cyclone centers to include
+    maximum_distance : float, default 400_000.0
+        Maximum distance to individual basin in meters of cyclone centers to include
         in resulting GeoDataFrame.
     location_column : str, default 'GAGE_ID'
         Column in basins to use as location identifier.

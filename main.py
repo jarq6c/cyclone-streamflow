@@ -38,11 +38,10 @@ def main(
     )
 
     # Accumulate storm-basin periods
-    # TODO Fix erroneous distance. Projection is in meters. Change 400 to 400_000.
     basin_storms = basin_tracks.groupby(["provider_id", "storm"]).agg(
-        Name=pd.NamedAgg(column="name", aggfunc="first"),
-        Start=pd.NamedAgg(column="time", aggfunc="min"),
-        End=pd.NamedAgg(column="time", aggfunc="max")
+        name=pd.NamedAgg(column="name", aggfunc="first"),
+        start=pd.NamedAgg(column="time", aggfunc="min"),
+        end=pd.NamedAgg(column="time", aggfunc="max")
     )
     print(basin_storms)
 
