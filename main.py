@@ -4,7 +4,7 @@ import logging
 
 import pandas as pd
 
-from src.cyclone_streamflow.configuration import load_configuration, DataType
+from src.cyclone_streamflow.configuration import load_configuration, DataType, IBTrACSColumn, NWMBasinColumn
 from src.cyclone_streamflow.pipelines import download_all_data, process_all_data, merge_storm_basins
 
 # Configure logging
@@ -34,14 +34,15 @@ def main(
         basins=data[DataType.NWM_BASINS],
         storms=data[DataType.IBTRACS],
         filepath=configuration.data_directory / configuration.processed_data.nwm_basin_storms.path,
-        location_column="provider_id"
+        location_column=NWMBasinColumn.PROVIDER_ID
     )
 
     # Accumulate storm-basin periods
-    basin_storms = basin_tracks.groupby(["provider_id", "storm"]).agg(
-        name=pd.NamedAgg(column="name", aggfunc="first"),
-        start=pd.NamedAgg(column="time", aggfunc="min"),
-        end=pd.NamedAgg(column="time", aggfunc="max")
+    # TODO add peak flow to each storm basin event (USGS WaterData)
+    basin_storms = basin_tracks.groupby([NWMBasinColumn.PROVIDER_ID, IBTrACSColumn.STORM_ID]).agg(
+        name=pd.NamedAgg(column=IBTrACSColumn.STORM_NAME, aggfunc="first"),
+        start=pd.NamedAgg(column=IBTrACSColumn.TIME, aggfunc="min"),
+        end=pd.NamedAgg(column=IBTrACSColumn.TIME, aggfunc="max")
     )
     print(basin_storms)
 

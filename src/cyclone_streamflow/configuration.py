@@ -31,6 +31,10 @@ class IBTrACSColumn(StrEnum):
     LIFETIME_MAXIMUM = "lifetime_max_intensity"
     TIME = "time"
 
+class NWMBasinColumn(StrEnum):
+    """NWM Basin geometry column labels."""
+    PROVIDER_ID = "provider_id"
+
 GLOBAL_CRS: Literal["ESRI:102010"] = "ESRI:102010"
 """Distance preserving CRS string. North America Equidistant Conic."""
 

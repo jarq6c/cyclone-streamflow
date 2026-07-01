@@ -2,3 +2,4 @@ xarray
 polars
 pydantic
 requests
+hydrotools.waterdata_client
