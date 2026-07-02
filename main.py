@@ -6,6 +6,7 @@ import pandas as pd
 
 from src.cyclone_streamflow.configuration import load_configuration, DataType, IBTrACSColumn, NWMBasinColumn
 from src.cyclone_streamflow.pipelines import download_all_data, process_all_data, merge_storm_basins
+from src.cyclone_streamflow.data_retrieval import download_storm_streamflow
 
 # Configure logging
 logging.basicConfig(
@@ -29,6 +30,12 @@ def main(
     sources = download_all_data(configuration)
     data = process_all_data(sources, directory=configuration.data_directory)
 
+    # Load API key
+    if configuration.api_key_file.exists():
+        api_key = configuration.api_key_file.read_text()
+    else:
+        api_key = None
+
     # Match basins to storm tracks
     basin_tracks = merge_storm_basins(
         basins=data[DataType.NWM_BASINS],
@@ -43,8 +50,26 @@ def main(
         name=pd.NamedAgg(column=IBTrACSColumn.STORM_NAME, aggfunc="first"),
         start=pd.NamedAgg(column=IBTrACSColumn.TIME, aggfunc="min"),
         end=pd.NamedAgg(column=IBTrACSColumn.TIME, aggfunc="max")
-    )
-    print(basin_storms)
+    ).reset_index()
+
+    # Add prefix and year for partitioning
+    basin_storms["prefix"] = basin_storms["provider_id"].str[:2]
+    basin_storms["year"] = basin_storms["start"].dt.year
+
+    # Partition
+    for (prefix, year), partition in basin_storms.groupby(["prefix", "year"]):
+        df = download_storm_streamflow(
+            storms=partition,
+            api_key=api_key
+        )
+        break
+
+    # 1. Check parquet store for existing data
+    # 2. Remove existing data from retrieval list
+    # 3. Prepare batches
+    # 4. Retrieve
+    # 5. Handle batches
+    # 6. Write to parquet store
 
 if __name__ == "__main__":
     main()

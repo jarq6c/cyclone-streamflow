@@ -213,9 +213,12 @@ class ProcessedDataStore(BaseModel):
         Pydantic model describing joined table of cyclones and streamflow basins.
     nwm_basin_storms : ProcessedData
         Pydantic model describing joined table of cyclones and NWM assimilation gauge basins.
+    streamflow : ProcessedData
+        Pydantic model indicating streamflow coincident with individual storm events.
     """
     basin_storms: ProcessedData
     nwm_basin_storms: ProcessedData
+    streamflow: ProcessedData
 
 class Configuration(BaseModel):
     """
@@ -225,6 +228,8 @@ class Configuration(BaseModel):
     ----------
     data_directory : pathlib.Path
         Path to data/download directory.
+    api_key_file : pathlib.Path
+        Path to USGS API key file.
     data_sources : list[DataSource]
         List of DataSource objects.
     processed_data : ProcessedDataStore
@@ -232,6 +237,7 @@ class Configuration(BaseModel):
 
     """
     data_directory: CustomDirectoryPath
+    api_key_file: CustomDirectoryPath
     data_sources: list[DataSource]
     processed_data: ProcessedDataStore
 

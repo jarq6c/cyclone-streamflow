@@ -1,5 +1,6 @@
 {
     "data_directory": "./data",
+    "api_key_file": "./api.key",
     "data_sources": [
         {
             "data_type": "IBTrACS",
@@ -58,6 +59,10 @@
         "nwm_basin_storms": {
             "path": "nwm_basin_storms.parquet",
             "description": "Storm tracks mapped to NWM assimilation gauge basins."
+        },
+        "streamflow": {
+            "path": "streamflow",
+            "description": "Streamflow coincident with individual storm events."
         }
     }
 }
