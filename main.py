@@ -3,6 +3,9 @@ from pathlib import Path
 import logging
 
 import pandas as pd
+import polars as pl
+
+from hydrotools.waterdata_client.transformers import NoDataError
 
 from src.cyclone_streamflow.configuration import load_configuration, DataType, IBTrACSColumn, NWMBasinColumn
 from src.cyclone_streamflow.pipelines import download_all_data, process_all_data, merge_storm_basins
@@ -58,10 +61,22 @@ def main(
 
     # Partition
     for (prefix, year), partition in basin_storms.groupby(["prefix", "year"]):
-        df = download_storm_streamflow(
-            storms=partition,
-            api_key=api_key
-        )
+        # Download
+        try:
+            df = download_storm_streamflow(
+                storms=partition,
+                api_key=api_key
+            )
+        except NoDataError:
+            logging.warning("No data available for partition, skipping")
+            continue
+
+        # Add partition columns
+        df["prefix"] = prefix
+        df["year"] = year
+
+        # Save
+        print(pl.DataFrame(df))
         break
 
     # 1. Check parquet store for existing data
