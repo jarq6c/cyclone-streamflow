@@ -3,13 +3,15 @@ import logging
 from datetime import datetime, UTC
 from pathlib import Path
 from typing import TypedDict, Optional
+from time import sleep
 
 import requests
 import pandas as pd
+import numpy as np
 
 from hydrotools.waterdata_client.async_web_client import get_all
 from hydrotools.waterdata_client.url_builder import build_request_batch_from_queries
-from hydrotools.waterdata_client.transformers import to_optimized_dataframe, NoDataError
+from hydrotools.waterdata_client.transformers import to_dataframe, NoDataError
 
 from .configuration import DataSource
 
@@ -68,7 +70,9 @@ def download_data_source(
 
 def download_storm_streamflow(
         storms: pd.DataFrame,
-        api_key: Optional[str] = None
+        api_key: Optional[str] = None,
+        batch_size: int = 50,
+        sleep_time: float = 19.0
     ) -> pd.DataFrame:
     """Given a dataframe of storm details, retrieve corresponding USGS streamflow.
     
@@ -77,6 +81,12 @@ def download_storm_streamflow(
     storms: pandas.DataFrame
         Dataframe of storm information. Must contain rows with columns for ['provider_id',
         'start', 'end'].
+    api_key : str
+        USGS API key.
+    batch_size : int
+        Number of URLs to retrieve before sleeping.
+    sleep_time : float
+        Amount of time to sleep between batches.
     
     Returns
     -------
@@ -84,9 +94,11 @@ def download_storm_streamflow(
         Retrieved streamflow.
     """
     # Extract subset of columns from storms
+    LOGGER.info("Subsetting storm dataframe")
     subset = storms[["provider_id", "start", "end"]]
 
     # Build queries
+    LOGGER.info("Building queries")
     queries: list[RequestParameters] = []
     for _, provider_id, start, end in subset.itertuples():
         # Build individual query
@@ -99,5 +111,40 @@ def download_storm_streamflow(
             api_key=api_key
         ))
 
-    print(queries)
-    return pd.DataFrame()
+    # Build URLs
+    LOGGER.info("Building URLs")
+    urls = build_request_batch_from_queries(queries=queries)
+
+    # Batch URLs
+    LOGGER.info("Batching URLs")
+    number_of_batches = (len(urls) // batch_size) + 1
+    batches = np.array_split(urls, number_of_batches)
+
+    # Retrieve batches
+    LOGGER.info("Retrieving batches")
+    dfs: list[pd.DataFrame] = []
+    for batch in batches:
+        LOGGER.info("Retrieving batch")
+        # Get deserialized JSON
+        data = get_all(
+            urls=batch,
+            max_retries=1
+        )
+
+        # Convert to dataframes
+        LOGGER.info("Processing batch")
+        try:
+            dfs.append(to_dataframe(data))
+        except NoDataError:
+            LOGGER.warning("Empty batch")
+
+        # Sleep
+        LOGGER.info("Sleeping for %f s", sleep_time)
+        sleep(sleep_time)
+
+    # Check for data
+    if len(dfs) == 0:
+        raise NoDataError("No batches returned data.")
+
+    LOGGER.info("Merging batches")
+    return pd.concat(dfs, ignore_index=True)
