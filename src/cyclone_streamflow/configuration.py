@@ -234,12 +234,15 @@ class Configuration(BaseModel):
         List of DataSource objects.
     processed_data : ProcessedDataStore
         Pydantic model that track intermediate processed data.
+    streamflow_manifest: str
+        File for keeping track of downloaded partitions.
 
     """
     data_directory: CustomDirectoryPath
     api_key_file: CustomDirectoryPath
     data_sources: list[DataSource]
     processed_data: ProcessedDataStore
+    streamflow_manifest: str = "streamflow_manifest.csv"
 
 def load_configuration(
         configuration_filepath: Path = Path("configuration.json")
