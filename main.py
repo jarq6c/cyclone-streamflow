@@ -59,6 +59,11 @@ def main(
     basin_storms["prefix"] = basin_storms["provider_id"].str[:2]
     basin_storms["year"] = basin_storms["start"].dt.year
 
+    # Validate manifest
+    manifest_file: Path = configuration.data_directory / configuration.streamflow_manifest
+    if manifest_file.exists():
+        manifest = pd.read_csv(manifest_file)
+
     # Partition
     for (prefix, year), partition in basin_storms.groupby(["prefix", "year"]):
         # Download
@@ -76,6 +81,7 @@ def main(
         df["year"] = year
 
         # Save
+        # pl.DataFrame(df).write_parquet("data/streamflow", partition_by=["prefix", "year"])
         print(pl.DataFrame(df))
         break
 
