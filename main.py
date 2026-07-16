@@ -10,6 +10,7 @@ from hydrotools.waterdata_client.transformers import NoDataError
 from src.cyclone_streamflow.configuration import load_configuration, DataType, IBTrACSColumn, NWMBasinColumn
 from src.cyclone_streamflow.pipelines import download_all_data, process_all_data, merge_storm_basins
 from src.cyclone_streamflow.data_retrieval import download_storm_streamflow
+from src.cyclone_streamflow.manifest import SQLiteManifestManager, DownloadStatus
 
 # Configure logging
 logging.basicConfig(
@@ -59,10 +60,13 @@ def main(
     basin_storms["prefix"] = basin_storms["provider_id"].str[:2]
     basin_storms["year"] = basin_storms["start"].dt.year
 
-    # Validate manifest
-    manifest_file: Path = configuration.data_directory / configuration.streamflow_manifest
-    if manifest_file.exists():
-        manifest = pd.read_csv(manifest_file)
+    # Setup manifest
+    manifest_file: Path = configuration.data_directory / configuration.processed_data.streamflow_manifest.path
+    manager = SQLiteManifestManager(manifest_file)
+    manager.initialize_partitions(
+        records=basin_storms[["prefix", "year"]].drop_duplicates().to_records(index=False)
+    )
+    return
 
     # Partition
     for (prefix, year), partition in basin_storms.groupby(["prefix", "year"]):

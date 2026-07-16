@@ -3,6 +3,9 @@ import logging
 from enum import StrEnum
 import sqlite3
 from pathlib import Path
+from typing import Any
+
+import numpy as np
 
 LOGGER: logging.Logger = logging.getLogger(__name__)
 """Module-level logger."""
@@ -48,14 +51,14 @@ CREATE TABLE IF NOT EXISTS {self._partition_manifest_table} (
             conn.execute(create_table_sql)
             conn.commit()
 
-    def initialize_partitions(self, records: list[tuple[str, int]]) -> None:
+    def initialize_partitions(self, records: np.recarray[Any, np.dtype[np.record]]) -> None:
         """Populate the manifest table with distinct partitions set to the default
         status (e.g. 'PENDING').
         
         Parameters
         ----------
-        records : list[tuple[str, int]]
-            List of individual partition indices as a tuples of (str, int). For
+        records : numpy.recarray
+            Record array of individual partition indices as a tuples of (str, int). For
             example, [('01', 2001), ('02', 1999)].
         """
         insert_sql = f"""

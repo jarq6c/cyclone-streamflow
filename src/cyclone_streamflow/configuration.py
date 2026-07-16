@@ -215,10 +215,13 @@ class ProcessedDataStore(BaseModel):
         Pydantic model describing joined table of cyclones and NWM assimilation gauge basins.
     streamflow : ProcessedData
         Pydantic model indicating streamflow coincident with individual storm events.
+    streamflow_manifest : ProcessedData
+        Pydantic model describing sqlite3 database used to track streamflow downloads.
     """
     basin_storms: ProcessedData
     nwm_basin_storms: ProcessedData
     streamflow: ProcessedData
+    streamflow_manifest: ProcessedData
 
 class Configuration(BaseModel):
     """
@@ -234,15 +237,12 @@ class Configuration(BaseModel):
         List of DataSource objects.
     processed_data : ProcessedDataStore
         Pydantic model that track intermediate processed data.
-    streamflow_manifest: str
-        File for keeping track of downloaded partitions.
 
     """
     data_directory: CustomDirectoryPath
     api_key_file: CustomDirectoryPath
     data_sources: list[DataSource]
     processed_data: ProcessedDataStore
-    streamflow_manifest: str = "streamflow_manifest.csv"
 
 def load_configuration(
         configuration_filepath: Path = Path("configuration.json")

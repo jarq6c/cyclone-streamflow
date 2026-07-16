@@ -63,6 +63,10 @@
         "streamflow": {
             "path": "streamflow",
             "description": "Streamflow coincident with individual storm events."
+        },
+        "streamflow_manifest": {
+            "path": "streamflow_manifest.sqlite3",
+            "description": "Tracks progress of streamflow downloads."
         }
     }
 }
