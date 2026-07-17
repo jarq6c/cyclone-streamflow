@@ -113,4 +113,4 @@ WHERE {self._prefix_field} = ? AND {self._year_field} = ?;
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(update_sql, (status, prefix, year))
             conn.commit()
-            LOGGER.info("Partition %s, %d updated to %s", prefix, year, status)
+            LOGGER.info("Partition %s/%d updated to %s", prefix, year, status)
