@@ -66,6 +66,7 @@ def main(
     manager.initialize_partitions(
         records=basin_storms[["prefix", "year"]].drop_duplicates().to_records(index=False)
     )
+    streamflow_directory = configuration.data_directory / configuration.processed_data.streamflow.path
 
     # Download
     partitions = (
@@ -73,6 +74,19 @@ def main(
         manager.get_partitions(DownloadStatus.PROCESSING)
     )
     for prefix, year in partitions:
+        # Check for partition
+        data_check = pl.scan_parquet(
+            streamflow_directory
+        ).filter(
+            pl.col("prefix") == prefix,
+            pl.col("year") == year
+        ).select("value").head().collect().count().item()
+
+        if data_check == 5:
+            logging.warning("Skipping existing partition %s/%d", prefix, year)
+            manager.update_status(prefix, year, DownloadStatus.DONE)
+            continue
+
         # Extract storm events
         storms = basin_storms[(basin_storms["prefix"] == prefix) & (basin_storms["year"] == year)]
 
@@ -93,7 +107,16 @@ def main(
         df["year"] = year
 
         # Save
-        pl.DataFrame(df).write_parquet("data/streamflow", partition_by=["prefix", "year"])
+        pl_df = pl.from_pandas(df[[
+            "usgs_site_code",
+            "value_time",
+            "value",
+            "prefix",
+            "year"
+        ]]).with_columns(
+            pl.col("year").cast(pl.Int32)
+        )
+        pl_df.write_parquet(streamflow_directory, partition_by=["prefix", "year"])
         manager.update_status(prefix, year, DownloadStatus.DONE)
         break
 
