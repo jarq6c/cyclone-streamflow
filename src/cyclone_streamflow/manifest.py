@@ -67,7 +67,7 @@ VALUES (?, ?, '{self._default_status}');
 """
         LOGGER.info("Populating %s", self._partition_manifest_table)
         with sqlite3.connect(self.db_path) as conn:
-            conn.executemany(insert_sql, records)
+            conn.executemany(insert_sql, records.tolist())
             conn.commit()
 
     def get_partitions(self, status: DownloadStatus) -> list[tuple[str, int]]:

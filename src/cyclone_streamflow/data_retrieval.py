@@ -11,7 +11,7 @@ import numpy as np
 
 from hydrotools.waterdata_client.async_web_client import get_all
 from hydrotools.waterdata_client.url_builder import build_request_batch_from_queries
-from hydrotools.waterdata_client.transformers import to_dataframe, NoDataError
+from hydrotools.waterdata_client.transformers import to_optimized_dataframe, NoDataError
 
 from .configuration import DataSource
 
@@ -134,7 +134,7 @@ def download_storm_streamflow(
         # Convert to dataframes
         LOGGER.info("Processing batch")
         try:
-            dfs.append(to_dataframe(data))
+            dfs.append(to_optimized_dataframe(data))
         except NoDataError:
             LOGGER.warning("Empty batch")
 

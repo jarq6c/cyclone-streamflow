@@ -66,18 +66,26 @@ def main(
     manager.initialize_partitions(
         records=basin_storms[["prefix", "year"]].drop_duplicates().to_records(index=False)
     )
-    return
 
-    # Partition
-    for (prefix, year), partition in basin_storms.groupby(["prefix", "year"]):
+    # Download
+    partitions = (
+        manager.get_partitions(DownloadStatus.PENDING) +
+        manager.get_partitions(DownloadStatus.PROCESSING)
+    )
+    for prefix, year in partitions:
+        # Extract storm events
+        storms = basin_storms[(basin_storms["prefix"] == prefix) & (basin_storms["year"] == year)]
+
         # Download
         try:
+            manager.update_status(prefix, year, DownloadStatus.PROCESSING)
             df = download_storm_streamflow(
-                storms=partition,
+                storms=storms,
                 api_key=api_key
             )
         except NoDataError:
             logging.warning("No data available for partition, skipping")
+            manager.update_status(prefix, year, DownloadStatus.NODATA)
             continue
 
         # Add partition columns
@@ -85,16 +93,9 @@ def main(
         df["year"] = year
 
         # Save
-        # pl.DataFrame(df).write_parquet("data/streamflow", partition_by=["prefix", "year"])
-        print(pl.DataFrame(df))
+        pl.DataFrame(df).write_parquet("data/streamflow", partition_by=["prefix", "year"])
+        manager.update_status(prefix, year, DownloadStatus.DONE)
         break
-
-    # 1. Check parquet store for existing data
-    # 2. Remove existing data from retrieval list
-    # 3. Prepare batches
-    # 4. Retrieve
-    # 5. Handle batches
-    # 6. Write to parquet store
 
 if __name__ == "__main__":
     main()
