@@ -118,7 +118,6 @@ def main(
         )
         pl_df.write_parquet(streamflow_directory, partition_by=["prefix", "year"])
         manager.update_status(prefix, year, DownloadStatus.DONE)
-        break
 
 if __name__ == "__main__":
     main()
