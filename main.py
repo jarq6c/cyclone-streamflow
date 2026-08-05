@@ -49,7 +49,6 @@ def main(
     )
 
     # Accumulate storm-basin periods
-    # TODO add peak flow to each storm basin event (USGS WaterData)
     basin_storms = basin_tracks.groupby([NWMBasinColumn.PROVIDER_ID, IBTrACSColumn.STORM_ID]).agg(
         name=pd.NamedAgg(column=IBTrACSColumn.STORM_NAME, aggfunc="first"),
         start=pd.NamedAgg(column=IBTrACSColumn.TIME, aggfunc="min"),
@@ -118,6 +117,57 @@ def main(
         )
         pl_df.write_parquet(streamflow_directory, partition_by=["prefix", "year"])
         manager.update_status(prefix, year, DownloadStatus.DONE)
+
+    # Scan streamflow parquet
+    logging.info("Scanning %s", streamflow_directory)
+    streamflow = pl.scan_parquet(streamflow_directory)
+
+    # Add peak streamflow by site
+    logging.info("Adding peak streamflow")
+    basin_storms["usgs_site_code"] = "USGS-" + basin_storms["provider_id"]
+    for (p, y), df in basin_storms.groupby(["prefix", "year"]):
+        # Load observations
+        obs = streamflow.filter(
+            pl.col("prefix") == p,
+            pl.col("year") == y
+        ).select(
+            ["usgs_site_code", "value_time", "value"]
+        ).collect()
+
+        # Convert subset to polars
+        intervals = pl.from_pandas(df[[
+            "usgs_site_code",
+            "storm",
+            "name",
+            "start",
+            "end"
+        ]])
+
+        # Join and aggregate
+        peaks = intervals.join_where(
+            obs,
+            pl.col("usgs_site_code") == pl.col("usgs_site_code"),
+            pl.col("start") <= pl.col("value_time"),
+            pl.col("end") >= pl.col("value_time")
+        ).group_by(
+            ["usgs_site_code", "storm", "start", "end"],
+            maintain_order=True
+        ).agg(
+            peak_value_cfs=pl.col("value").max()
+        )
+
+        # Restore NaNs
+        storm_peaks = intervals.join(
+            peaks,
+            on=["usgs_site_code", "storm", "start", "end"],
+            how="left"
+        )
+
+        # Map flood categories
+        print(storm_peaks)
+        if peaks.is_empty():
+            continue
+        break
 
 if __name__ == "__main__":
     main()
