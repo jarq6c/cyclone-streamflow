@@ -65,7 +65,10 @@ def main(
     manager.initialize_partitions(
         records=basin_storms[["prefix", "year"]].drop_duplicates().to_records(index=False)
     )
-    streamflow_directory = configuration.data_directory / configuration.processed_data.streamflow.path
+    streamflow_directory: Path = (
+        configuration.data_directory /
+        configuration.processed_data.streamflow.path
+    )
 
     # Download
     partitions = (
@@ -120,54 +123,14 @@ def main(
 
     # Scan streamflow parquet
     logging.info("Scanning %s", streamflow_directory)
-    streamflow = pl.scan_parquet(streamflow_directory)
+    # streamflow = pl.scan_parquet(streamflow_directory)
 
-    # Add peak streamflow by site
-    logging.info("Adding peak streamflow")
+    # Convert storms frame to polars
     basin_storms["usgs_site_code"] = "USGS-" + basin_storms["provider_id"]
-    for (p, y), df in basin_storms.groupby(["prefix", "year"]):
-        # Load observations
-        obs = streamflow.filter(
-            pl.col("prefix") == p,
-            pl.col("year") == y
-        ).select(
-            ["usgs_site_code", "value_time", "value"]
-        ).collect()
+    basin_storms_pl = pl.from_pandas(basin_storms)
 
-        # Convert subset to polars
-        intervals = pl.from_pandas(df[[
-            "usgs_site_code",
-            "storm",
-            "name",
-            "start",
-            "end"
-        ]])
-
-        # Join and aggregate
-        peaks = intervals.join_where(
-            obs,
-            pl.col("usgs_site_code") == pl.col("usgs_site_code"),
-            pl.col("start") <= pl.col("value_time"),
-            pl.col("end") >= pl.col("value_time")
-        ).group_by(
-            ["usgs_site_code", "storm", "start", "end"],
-            maintain_order=True
-        ).agg(
-            peak_value_cfs=pl.col("value").max()
-        )
-
-        # Restore NaNs
-        storm_peaks = intervals.join(
-            peaks,
-            on=["usgs_site_code", "storm", "start", "end"],
-            how="left"
-        )
-
-        # Map flood categories
-        print(storm_peaks)
-        if peaks.is_empty():
-            continue
-        break
+    # TODO Map peak streamflow to cyclones
+    streamflow = pl.scan_parquet(streamflow_directory)
 
 if __name__ == "__main__":
     main()
