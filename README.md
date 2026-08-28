@@ -38,7 +38,7 @@ An end-to-end Python data integration pipeline designed to quantify cyclone-driv
 The pipeline operates in four main stages:
 
 1. **Data Ingestion & Standardized Reprojection**: Automates fetching remote NetCDF, GeoPackage, Shapefile, and CSV data sources defined in `configuration.json`. Geometries are clean-projected to North America Equidistant Conic (`ESRI:102010`).
-2. **Spatial Distance Intersection**: Buffers National Water Model (NWM) assimilation basin boundaries to extract tropical cyclone tracks within $400\text{ km}$ of each river basin, generating site-specific storm temporal windows (`start` to `end`).
+2. **Spatial Distance Intersection**: Buffers National Water Model (NWM) assimilation basin boundaries to extract tropical cyclone tracks within $400\text{ km}$ of each river basin, generating site-specific storm temporal windows (`start` to `end`). The $400\text{ km}$ buffer was informed by Guzman & Jiang (2023).
 3. **Partitioned Streamflow Ingestion**: Tracks progress via a localized SQLite checkpoint manifest (`streamflow_manifest.sqlite3`). Batched asynchronous requests retrieve continuous USGS unit-value streamflow observations during storm windows, saving records to a Hive-partitioned Parquet dataset (`prefix=XX/year=YYYY/`).
 4. **Lazy Peak Discharge Aggregation**: Uses Polars lazy frames to execute exact multi-column joins (`usgs_site_code`, `prefix`, `year`) against the Hive partition tree, extracting maximum volumetric flow rate (`peak_streamflow_cfs`) per storm event.
 
@@ -168,6 +168,12 @@ The final output file (`cyclone_peak_streamflow.parquet`) contains the calculate
 
 ---
 
-## Attribution
+## References
 
-This software is developed for scientific hydrological research. Data retrieved through this package requires proper attribution to NOAA NCEI, NOAA OWP, and the U.S. Geological Survey (USGS). Citations for all downloaded datasets are generated dynamically during execution and stored in markdown format within your configured `data_directory`.
+ - Gahtan, J., K. R. Knapp, C. J. Schreck, H. J. Diamond, J. P. Kossin, M. C. Kruk, 2024: International Best Track Archive for Climate Stewardship (IBTrACS) Project, Version 4r01. [indicate subset used]. NOAA National Centers for Environmental Information. doi:10.25921/82ty-9e16 [2026-06-11]
+ - Guzman, O., & Jiang, H. (2023). Climatology of Tropical Cyclone Rainfall Magnitude at Different Landfalling Stages: An Emphasis on After-Landfall Rain. Journal of Applied Meteorology and Climatology, 62(7), 801–815. https://doi.org/10.1175/JAMC-D-22-0055.1
+ - Knapp, K. R., M. C. Kruk, D. H. Levinson, H. J. Diamond, and C. J. Neumann, 2010: The International Best Track Archive for Climate Stewardship (IBTrACS): Unifying tropical cyclone best track data. Bulletin of the American Meteorological Society, 91, 363-376. doi:10.1175/2009BAMS2755.1
+ - NOAA's International Best Track Archive for Climate Stewardship (IBTrACS) data, accessed on [2026-06-11]
+ - NOAA Office of Water Prediction, All Gauges Report csv download, https://water.noaa.gov/about/data-and-web-services-catalog. accessed on [2026-06-12]
+ - Regina, J. A. (2026). National Water Model Assimilation Gage Basin Boundaries, HydroShare, https://doi.org/10.4211/hs.535aab9267ee4aed8502fd63dcd3fac2.
+ - U.S. Geological Survey, [2026], USGS Water Data for the Nation: U.S. Geological Survey National Water Information System database, accessed [July 17, 2026], at https://doi.org/10.5066/F7P55KJN.
