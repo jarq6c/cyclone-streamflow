@@ -166,6 +166,8 @@ The final output file (`cyclone_peak_streamflow.parquet`) contains the calculate
 | `end` | Datetime (UTC) | Ending timestamp of the storm event window.|
 | `peak_streamflow_cfs` | Float64 | Maximum recorded volumetric streamflow discharge in cubic feet per second ($cfs$).|
 
+Null `peak_streamflow_cfs` values indicate a lack of streamflow observations for the specified period.
+
 ---
 
 ## References
