@@ -109,6 +109,7 @@ def main(
         df["year"] = year
 
         # Save
+        logging.info("Saving %s", streamflow_directory)
         pl_df = pl.from_pandas(df[[
             "usgs_site_code",
             "value_time",
@@ -121,16 +122,56 @@ def main(
         pl_df.write_parquet(streamflow_directory, partition_by=["prefix", "year"])
         manager.update_status(prefix, year, DownloadStatus.DONE)
 
-    # Scan streamflow parquet
-    logging.info("Scanning %s", streamflow_directory)
-    # streamflow = pl.scan_parquet(streamflow_directory)
+    # Save storms frame to parquet
+    ofile: Path = (
+        configuration.data_directory /
+        configuration.processed_data.basin_storms.path
+    )
+    logging.info("Checking %s", ofile)
+    if not ofile.exists():
+        basin_storms["usgs_site_code"] = "USGS-" + basin_storms["provider_id"]
+        pl.from_pandas(basin_storms).write_parquet(ofile)
 
-    # Convert storms frame to polars
-    basin_storms["usgs_site_code"] = "USGS-" + basin_storms["provider_id"]
-    basin_storms_pl = pl.from_pandas(basin_storms)
+    # Map peak streamflow to cyclones
+    logging.info("Mapping streamflow to cyclones")
+    storms = pl.scan_parquet(ofile).select(
+        ["storm", "name", "start", "end", "usgs_site_code", "prefix", "year"]
+    )
+    streamflow = pl.scan_parquet(
+        streamflow_directory,
+        hive_partitioning=True
+    ).select(
+        ["usgs_site_code", "value_time", "value", "prefix", "year"]
+    )
+    peaks = storms.join(
+        streamflow,
+        on=["usgs_site_code", "prefix", "year"],
+        how="inner"
+    ).filter(
+        (pl.col("value_time") >= pl.col("start"))
+        & (pl.col("value_time") <= pl.col("end"))
+    ).group_by(
+        ["usgs_site_code", "storm"]
+    ).agg(
+        peak_streamflow_cfs=pl.col("value").max()
+    )
 
-    # TODO Map peak streamflow to cyclones
-    streamflow = pl.scan_parquet(streamflow_directory)
+    # Let-join back to preserve metadata
+    logging.info("Saving final dataset")
+    final_dataset = storms.select(
+        ["usgs_site_code", "storm", "name", "start", "end"]
+    ).unique().join(
+        peaks,
+        on=["usgs_site_code", "storm"],
+        how="left"
+    )
+
+    # Save final dataset
+    final_output_path: Path = (
+        configuration.data_directory / "cyclone_peak_streamflow.parquet"
+    )
+    final_dataset.sink_parquet(final_output_path)
+    logging.info("Saved dataset to: %s", final_output_path)
 
 if __name__ == "__main__":
     main()

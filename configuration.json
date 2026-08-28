@@ -53,7 +53,7 @@
     ],
     "processed_data": {
         "basin_storms": {
-            "path": "basin_storms.parquet",
+            "path": "usgs_basin_storms.parquet",
             "description": "Storm tracks mapped to streamflow basins."
         },
         "nwm_basin_storms": {
