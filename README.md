@@ -25,7 +25,7 @@ An end-to-end Python data integration pipeline designed to quantify cyclone-driv
          [ USGS Streamflow Client ]
                      │
                      ▼
-       [ Hive Parquet Store (01/1978) ]
+           [ Hive Parquet Store ]
                      │
                      ▼
         [ Polars Lazy Partition Join ]
